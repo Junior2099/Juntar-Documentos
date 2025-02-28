@@ -42,8 +42,9 @@
             cursor: pointer;
             text-align: center;
             color: #007bff;
+            transition: background-color 0.3s ease;
         }
-        .file-input:hover {
+        .file-input:hover, .file-input.dragover {
             background-color: #e9f5ff;
         }
         .buttons {
@@ -77,23 +78,14 @@
             font-size: 1rem;
             color: #007bff;
         }
-        .loading span {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Envie seus arquivos (JPG, PNG, PDF) para juntar ou separar em PDFs/JPGs</h2>
-        <label for="fileInput" class="file-input">
-            <span class="material-icons-outlined">upload</span> Clique para enviar arquivos
+        <h2>Envie seus arquivos (JPG, PNG, PDF) para juntar ou separar</h2>
+        <label for="fileInput" class="file-input" id="dropArea">
+            <span class="material-icons-outlined">upload</span> Arraste ou clique para enviar arquivos
         </label>
         <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
         <div class="buttons">
@@ -111,12 +103,31 @@
     
     <script>
         const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('dropArea');
         const loading = document.getElementById('loading');
 
+        // Evento de seleção de arquivos
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 alert(`${fileInput.files.length} arquivo(s) selecionado(s).`);
             }
+        });
+
+        // Drag and Drop
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+            fileInput.files = event.dataTransfer.files;
+            alert(`${fileInput.files.length} arquivo(s) selecionado(s).`);
         });
 
         async function mergeFiles() {
@@ -149,12 +160,7 @@
                             
                             const { width, height } = image.scale(1);
                             const page = pdfDoc.addPage([width, height]);
-                            page.drawImage(image, {
-                                x: 0,
-                                y: 0,
-                                width: width,
-                                height: height
-                            });
+                            page.drawImage(image, { x: 0, y: 0, width, height });
                         }
                         resolve();
                     };
