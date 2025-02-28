@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juntar Arquivos em PDF</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/?size=100&id=GCWQkWqtBCgB&format=png&color=000000">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <h2>Envie seus arquivos (JPG, PNG, PDF) e junte tudo em um único PDF</h2>
+    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf">
+    <button onclick="mergeFiles()">Salvar Tudo Junto</button>
+    
+    <script>
+        async function mergeFiles() {
+            const { PDFDocument } = PDFLib;
+            const files = document.getElementById('fileInput').files;
+            if (files.length === 0) {
+                alert("Envie pelo menos um arquivo!");
+                return;
+            }
+            
+            const pdfDoc = await PDFDocument.create();
+            
+            for (const file of files) {
+                const reader = new FileReader();
+                const fileType = file.type;
+                
+                await new Promise(resolve => {
+                    reader.onload = async function(event) {
+                        const fileData = new Uint8Array(event.target.result);
+                        
+                        if (fileType === "application/pdf") {
+                            const pdf = await PDFDocument.load(fileData);
+                            const copiedPages = await pdfDoc.copyPages(pdf, pdf.getPageIndices());
+                            copiedPages.forEach(page => pdfDoc.addPage(page));
+                        } else if (fileType.startsWith("image/")) {
+                            const image = fileType.includes("jpeg") 
+                                ? await pdfDoc.embedJpg(fileData) 
+                                : await pdfDoc.embedPng(fileData);
+                            
+                            const { width, height } = image.scale(1);
+                            const page = pdfDoc.addPage([width, height]);
+                            page.drawImage(image, {
+                                x: 0,
+                                y: 0,
+                                width: width,
+                                height: height
+                            });
+                        }
+                        resolve();
+                    };
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "arquivos_combinados.pdf";
+            link.click();
+        }
+    </script>
+</body>
+</html>
