@@ -78,12 +78,18 @@
             font-size: 1rem;
             color: #007bff;
         }
+        .file-count {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>Envie seus arquivos (JPG, PNG, PDF) para juntar ou separar</h2>
+        <p class="file-count" id="fileCount">Nenhum arquivo enviado</p>
         <label for="fileInput" class="file-input" id="dropArea">
             <span class="material-icons-outlined">upload</span> Arraste ou clique para enviar arquivos
         </label>
@@ -105,15 +111,26 @@
         const fileInput = document.getElementById('fileInput');
         const dropArea = document.getElementById('dropArea');
         const loading = document.getElementById('loading');
+        const fileCount = document.getElementById('fileCount');
 
-        // Evento de seleção de arquivos
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                alert(`${fileInput.files.length} arquivo(s) selecionado(s).`);
+        
+        function updateFileCount() {
+            const count = fileInput.files.length;
+            if (count === 0) {
+                fileCount.textContent = "Nenhum arquivo enviado";
+            } else if (count === 1) {
+                fileCount.textContent = "1 arquivo enviado";
+            } else {
+                fileCount.textContent = `${count} arquivos enviados`;
             }
+        }
+
+        
+        fileInput.addEventListener('change', () => {
+            updateFileCount();
         });
 
-        // Drag and Drop
+        
         dropArea.addEventListener('dragover', (event) => {
             event.preventDefault();
             dropArea.classList.add('dragover');
@@ -127,7 +144,7 @@
             event.preventDefault();
             dropArea.classList.remove('dragover');
             fileInput.files = event.dataTransfer.files;
-            alert(`${fileInput.files.length} arquivo(s) selecionado(s).`);
+            updateFileCount();
         });
 
         async function mergeFiles() {
