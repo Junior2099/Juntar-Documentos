@@ -5,134 +5,311 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juntar e Separar Arquivos em PDF/JPG</title>
     <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/?size=100&id=GCWQkWqtBCgB&format=png&color=000000">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --danger-color: #f72585;
+            --danger-hover: #e5177b;
+            --text-color: #333;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #f4f4f4;
-            margin: 0;
             padding: 20px;
         }
+        
         .container {
             background: white;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             text-align: center;
-            max-width: 500px;
             width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
         }
+        
         h2 {
-            color: #333;
+            color: var(--text-color);
             margin-bottom: 1.5rem;
+            font-weight: 700;
         }
-        .file-input {
-            margin: 1rem 0;
-            padding: 0.75rem;
+        
+        .info-text {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .file-input-container {
+            margin: 1.5rem 0;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 2rem;
             font-size: 1rem;
-            border: 2px dashed #007bff;
-            border-radius: 5px;
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
             width: 100%;
             cursor: pointer;
             text-align: center;
-            color: #007bff;
-            transition: background-color 0.3s ease;
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            transition: var(--transition);
         }
-        .file-input:hover, .file-input.dragover {
-            background-color: #e9f5ff;
+        
+        .file-input-label:hover, .file-input-label.dragover {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-hover);
         }
-        .buttons {
+        
+        .file-input-label .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-count {
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        .preview-container {
+            margin: 1.5rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            background: white;
+            text-align: left;
+        }
+        
+        .preview-item {
             display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--medium-gray);
+            transition: var(--transition);
+        }
+        
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+        
+        .preview-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .preview-thumbnail {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 1rem;
+            border-radius: 4px;
+        }
+        
+        .preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .preview-filename {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .preview-filesize {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+        
+        .preview-remove {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 0.5rem;
+        }
+        
+        .preview-remove:hover {
+            background-color: var(--danger-hover);
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 1rem;
             margin-top: 1.5rem;
         }
-        button {
-            background-color: #007bff;
+        
+        .btn {
+            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: background-color 0.3s ease;
+            transition: var(--transition);
+            font-weight: 500;
         }
-        button:hover {
-            background-color: #0056b3;
+        
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
         }
-        .material-icons-outlined {
-            font-size: 1.2rem;
+        
+        .btn:disabled {
+            background-color: var(--dark-gray);
+            cursor: not-allowed;
+            transform: none;
         }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        
         .loading {
             display: none;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             font-size: 1rem;
-            color: #007bff;
-        }
-        .file-count {
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        .preview-container {
-            margin-top: 1rem;
-            text-align: left;
-        }
-        .preview-item {
-            display: flex;
+            color: var(--primary-color);
             align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem;
-            border-bottom: 1px solid #ddd;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        .preview-item:last-child {
-            border-bottom: none;
+        
+        .loading .spinner {
+            animation: spin 1s linear infinite;
         }
-        .preview-item img {
-            max-width: 50px;
-            max-height: 50px;
-            margin-right: 1rem;
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .preview-item button {
-            background-color: #ff4d4d;
-            padding: 0.5rem;
-            font-size: 0.9rem;
+        
+        .empty-state {
+            padding: 2rem;
+            color: var(--dark-gray);
+            text-align: center;
         }
-        .preview-item button:hover {
-            background-color: #cc0000;
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .file-input-label {
+                padding: 1.5rem;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Envie seus arquivos (JPG, PNG, PDF) para juntar ou separar</h2>
-        <p> Navegador recomendado: FireFox </p>
-        <p class="file-count" id="fileCount">Nenhum arquivo enviado</p>
-        <label for="fileInput" class="file-input" id="dropArea">
-            <span class="material-icons-outlined">upload</span> Arraste ou clique para enviar arquivos
-        </label>
-        <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
-        <div class="preview-container" id="previewContainer"></div>
-        <div class="buttons">
-            <button onclick="mergeFiles()">
-                <span class="material-icons-outlined">merge</span> Salvar Tudo Junto
+        <h2>Combine ou separe arquivos PDF e imagens</h2>
+        <p class="info-text">Arraste e solte seus arquivos JPG, PNG ou PDF abaixo para combiná-los em um único PDF ou separá-los em arquivos individuais.</p>
+        
+        <div class="file-input-container">
+            <label for="fileInput" class="file-input-label" id="dropArea">
+                <span class="material-icons-outlined icon">cloud_upload</span>
+                Arraste arquivos aqui ou clique para selecionar
+            </label>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".jpg,.jpeg,.png,.pdf">
+        </div>
+        
+        <p class="file-count" id="fileCount">Nenhum arquivo selecionado</p>
+        
+        <div class="preview-container" id="previewContainer">
+            <div class="empty-state">
+                <span class="material-icons-outlined" style="font-size: 3rem; color: var(--medium-gray);">description</span>
+                <p>Nenhum arquivo para visualizar</p>
+            </div>
+        </div>
+        
+        <div class="buttons-container">
+            <button class="btn" id="mergeBtn" onclick="mergeFiles()" disabled>
+                <span class="material-icons-outlined">merge</span> Combinar em um PDF
             </button>
-            <button onclick="splitFiles()">
-                <span class="material-icons-outlined">call_split</span> Salvar Separado
+            <button class="btn" id="splitBtn" onclick="splitFiles()" disabled>
+                <span class="material-icons-outlined">call_split</span> Separar arquivos
+            </button>
+            <button class="btn btn-danger" id="clearBtn" onclick="clearFiles()" disabled>
+                <span class="material-icons-outlined">delete</span> Limpar tudo
             </button>
         </div>
+        
         <div class="loading" id="loading">
-            <span class="material-icons-outlined">autorenew</span> Processando...
+            <span class="material-icons-outlined spinner">autorenew</span> Processando seus arquivos...
         </div>
     </div>
     
@@ -142,59 +319,119 @@
         const loading = document.getElementById('loading');
         const fileCount = document.getElementById('fileCount');
         const previewContainer = document.getElementById('previewContainer');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const splitBtn = document.getElementById('splitBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
         let filesArray = [];
 
         function updateFileCount() {
             const count = filesArray.length;
             if (count === 0) {
-                fileCount.textContent = "Nenhum arquivo enviado";
-            } else if (count === 1) {
-                fileCount.textContent = "1 arquivo enviado";
+                fileCount.textContent = "Nenhum arquivo selecionado";
+                mergeBtn.disabled = true;
+                splitBtn.disabled = true;
+                clearBtn.disabled = true;
             } else {
-                fileCount.textContent = `${count} arquivos enviados`;
+                fileCount.textContent = `${count} arquivo${count !== 1 ? 's' : ''} selecionado${count !== 1 ? 's' : ''}`;
+                mergeBtn.disabled = false;
+                splitBtn.disabled = false;
+                clearBtn.disabled = false;
             }
         }
 
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]);
+        }
+
         function updatePreview() {
+            if (filesArray.length === 0) {
+                previewContainer.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined" style="font-size: 3rem; color: var(--medium-gray);">description</span>
+                        <p>Nenhum arquivo para visualizar</p>
+                    </div>
+                `;
+                return;
+            }
+
             previewContainer.innerHTML = '';
+            
             filesArray.forEach((file, index) => {
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
-
+                
+         
                 if (file.type.startsWith('image/')) {
                     const img = document.createElement('img');
+                    img.className = 'preview-thumbnail';
                     img.src = URL.createObjectURL(file);
                     previewItem.appendChild(img);
+                } else {
+                    const icon = document.createElement('div');
+                    icon.className = 'preview-thumbnail';
+                    icon.innerHTML = '<span class="material-icons-outlined" style="font-size: 2rem; color: var(--dark-gray);">picture_as_pdf</span>';
+                    previewItem.appendChild(icon);
                 }
-
-                const fileName = document.createElement('span');
-                fileName.textContent = file.name;
-                previewItem.appendChild(fileName);
-
-                const removeButton = document.createElement('button');
-                removeButton.innerHTML = '<span class="material-icons-outlined">delete</span>';
-                removeButton.onclick = () => removeFile(index);
-                previewItem.appendChild(removeButton);
-
+                
+            
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'preview-info';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'preview-filename';
+                nameDiv.textContent = file.name;
+                
+                const sizeDiv = document.createElement('div');
+                sizeDiv.className = 'preview-filesize';
+                sizeDiv.textContent = formatFileSize(file.size);
+                
+                infoDiv.appendChild(nameDiv);
+                infoDiv.appendChild(sizeDiv);
+                previewItem.appendChild(infoDiv);
+                
+              
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'preview-remove';
+                removeBtn.innerHTML = '<span class="material-icons-outlined" style="font-size: 1rem;">close</span>';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeFile(index);
+                };
+                
+                previewItem.appendChild(removeBtn);
                 previewContainer.appendChild(previewItem);
             });
         }
 
+       
         function removeFile(index) {
             filesArray.splice(index, 1);
             updateFileCount();
             updatePreview();
         }
 
+       
+        function clearFiles() {
+            filesArray = [];
+            fileInput.value = '';
+            updateFileCount();
+            updatePreview();
+        }
+
+   
         fileInput.addEventListener('change', () => {
             filesArray = Array.from(fileInput.files);
             updateFileCount();
             updatePreview();
         });
 
-        dropArea.addEventListener('dragover', (event) => {
-            event.preventDefault();
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
             dropArea.classList.add('dragover');
         });
 
@@ -202,104 +439,134 @@
             dropArea.classList.remove('dragover');
         });
 
-        dropArea.addEventListener('drop', (event) => {
-            event.preventDefault();
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
             dropArea.classList.remove('dragover');
-            filesArray = Array.from(event.dataTransfer.files);
-            fileInput.files = event.dataTransfer.files;
-            updateFileCount();
-            updatePreview();
+            
+            const dt = e.dataTransfer;
+            if (dt.files.length > 0) {
+                filesArray = Array.from(dt.files);
+                fileInput.files = dt.files;
+                updateFileCount();
+                updatePreview();
+            }
         });
 
+   
         async function mergeFiles() {
             const { PDFDocument } = PDFLib;
+            
             if (filesArray.length === 0) {
-                alert("Envie pelo menos um arquivo!");
+                alert("Por favor, adicione pelo menos um arquivo!");
                 return;
             }
             
-            loading.style.display = 'block';
-            const pdfDoc = await PDFDocument.create();
+            loading.style.display = 'flex';
             
-            for (const file of filesArray) {
-                const reader = new FileReader();
-                const fileType = file.type;
+            try {
+                const pdfDoc = await PDFDocument.create();
+                let hasValidFiles = false;
                 
-                await new Promise(resolve => {
-                    reader.onload = async function(event) {
-                        const fileData = new Uint8Array(event.target.result);
+               
+                for (const file of filesArray) {
+                    try {
+                        const fileData = await readFileAsArrayBuffer(file);
                         
-                        if (fileType === "application/pdf") {
+                        if (file.type === "application/pdf") {
                             const pdf = await PDFDocument.load(fileData);
                             const copiedPages = await pdfDoc.copyPages(pdf, pdf.getPageIndices());
                             copiedPages.forEach(page => pdfDoc.addPage(page));
-                        } else if (fileType.startsWith("image/")) {
-                            const image = fileType.includes("jpeg") 
-                                ? await pdfDoc.embedJpg(fileData) 
-                                : await pdfDoc.embedPng(fileData);
-                            
+                            hasValidFiles = true;
+                        } else if (file.type.startsWith("image/")) {
+                            const image = await embedImage(pdfDoc, file.type, fileData);
                             const { width, height } = image.scale(1);
                             const page = pdfDoc.addPage([width, height]);
                             page.drawImage(image, { x: 0, y: 0, width, height });
+                            hasValidFiles = true;
                         }
-                        resolve();
-                    };
-                    reader.readAsArrayBuffer(file);
-                });
+                    } catch (error) {
+                        console.error(`Erro ao processar o arquivo ${file.name}:`, error);
+                    }
+                }
+                
+                if (!hasValidFiles) {
+                    throw new Error("Nenhum arquivo válido para combinar (somente PDF e imagens são suportados)");
+                }
+                
+                const pdfBytes = await pdfDoc.save();
+                saveAs(new Blob([pdfBytes], { type: "application/pdf" }), "arquivos_combinados.pdf");
+            } catch (error) {
+                console.error("Erro ao combinar arquivos:", error);
+                alert(`Erro ao combinar arquivos: ${error.message}`);
+            } finally {
+                loading.style.display = 'none';
             }
-            
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: "application/pdf" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "arquivos_combinados.pdf";
-            link.click();
-            loading.style.display = 'none';
         }
         
+       
         async function splitFiles() {
             if (filesArray.length === 0) {
-                alert("Envie pelo menos um arquivo!");
+                alert("Por favor, adicione pelo menos um arquivo!");
                 return;
             }
             
-            loading.style.display = 'block';
-            for (const file of filesArray) {
-                const reader = new FileReader();
-                const fileType = file.type;
-                
-                await new Promise(resolve => {
-                    reader.onload = async function(event) {
-                        const fileData = new Uint8Array(event.target.result);
+            loading.style.display = 'flex';
+            
+            try {
+                for (const file of filesArray) {
+                    try {
+                        const fileData = await readFileAsArrayBuffer(file);
                         
-                        if (fileType.startsWith("image/")) {
-                            const link = document.createElement("a");
-                            link.href = URL.createObjectURL(new Blob([fileData], { type: fileType }));
-                            link.download = file.name;
-                            link.click();
-                        } else if (fileType === "application/pdf") {
-                            const { PDFDocument } = PDFLib;
-                            const pdfDoc = await PDFDocument.load(fileData);
-                            const totalPages = pdfDoc.getPageCount();
-                            
-                            for (let i = 0; i < totalPages; i++) {
-                                const newPdf = await PDFDocument.create();
-                                const [page] = await newPdf.copyPages(pdfDoc, [i]);
-                                newPdf.addPage(page);
-                                const pdfBytes = await newPdf.save();
-                                const blob = new Blob([pdfBytes], { type: "application/pdf" });
-                                const link = document.createElement("a");
-                                link.href = URL.createObjectURL(blob);
-                                link.download = `pagina_${i + 1}.pdf`;
-                                link.click();
-                            }
+                        if (file.type.startsWith("image/")) {
+                         
+                            saveAs(new Blob([fileData], { type: file.type }), file.name);
+                        } else if (file.type === "application/pdf") {
+                          
+                            await splitPdf(fileData, file.name.replace('.pdf', ''));
                         }
-                        resolve();
-                    };
-                    reader.readAsArrayBuffer(file);
-                });
+                    } catch (error) {
+                        console.error(`Erro ao processar o arquivo ${file.name}:`, error);
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao separar arquivos:", error);
+                alert(`Erro ao separar arquivos: ${error.message}`);
+            } finally {
+                loading.style.display = 'none';
             }
-            loading.style.display = 'none';
+        }
+        
+       
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        async function embedImage(pdfDoc, mimeType, fileData) {
+            if (mimeType.includes("jpeg")) {
+                return await pdfDoc.embedJpg(fileData);
+            } else if (mimeType.includes("png")) {
+                return await pdfDoc.embedPng(fileData);
+            }
+            throw new Error("Tipo de imagem não suportado");
+        }
+        
+        async function splitPdf(pdfData, baseName) {
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.load(pdfData);
+            const totalPages = pdfDoc.getPageCount();
+            
+            for (let i = 0; i < totalPages; i++) {
+                const newPdf = await PDFDocument.create();
+                const [page] = await newPdf.copyPages(pdfDoc, [i]);
+                newPdf.addPage(page);
+                const pdfBytes = await newPdf.save();
+                saveAs(new Blob([pdfBytes], { type: "application/pdf" }), `${baseName}_p${i + 1}.pdf`);
+            }
         }
     </script>
 </body>
